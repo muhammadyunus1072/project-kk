@@ -15,26 +15,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'adi@exata.site'],
-            [
-                'name'     => 'Adi Irawan',
-                'password' => Hash::make('password'),
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'admin@exata.site'],
+            ['email' => 'vip@super.com'],
             [
                 'name'     => 'Administrator',
-                'password' => Hash::make('password'),
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'admin@gmail.com'],
-            [
-                'name'     => 'Administrator',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('SQpsyqrigV9giX6TbqPV2TGP7Mjn5s'),
             ]
         );
     }

@@ -25,7 +25,8 @@ class KkDetailController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $details = KkDetail::where('user_id', $request->user()->id)
+        $details = KkDetail::with('submission:id,original_filename')
+            ->where('user_id', $request->user()->id)
             ->orderBy('is_submitted', 'asc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -46,6 +47,7 @@ class KkDetailController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'original_filename'    => 'nullable|string|max:255',
             'family_card_number'   => 'required|string|max:30',
             'head_of_family'       => 'required|string|max:255',
             'head_of_family_japan' => 'nullable|string|max:255',
@@ -86,6 +88,7 @@ class KkDetailController extends Controller
             'user_id'              => $request->user()->id,
             'submission_id'        => null,
             'batch_id'             => null,
+            'original_filename'    => $validated['original_filename'] ?? null,
             'family_card_number'   => $validated['family_card_number'],
             'head_of_family'       => $validated['head_of_family'],
             'head_of_family_japan' => $validated['head_of_family_japan'] ?? $validated['head_of_family'],
@@ -130,6 +133,7 @@ class KkDetailController extends Controller
         abort_unless($detail->user_id === $request->user()->id, 403, 'Unauthorized.');
 
         $validated = $request->validate([
+            'original_filename'    => 'sometimes|nullable|string|max:255',
             'family_card_number'   => 'sometimes|string|max:30',
             'head_of_family'       => 'sometimes|string|max:255',
             'head_of_family_japan' => 'nullable|string|max:255',

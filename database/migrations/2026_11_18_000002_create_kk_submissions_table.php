@@ -14,12 +14,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kk_submissions', function (Blueprint $table) {
-            $table->ulid('id')->primary();
-            $table->foreignUlid('batch_id')->constrained('kk_batches')->cascadeOnDelete();
+            $table->id();
+            $table->foreignId('batch_id')->constrained('kk_batches')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
-            // Attachment core metadata (similar to gensen_form_attachment without remittance type)
-            $table->string('disk')->default('s3');
+            // Attachment core metadata
+            $table->string('disk')->default('supabase');
             $table->string('path');
             $table->string('original_filename');
             $table->string('mimetype', 100);
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('checksum', 64); // SHA-256
 
             // Extraction processing state
-            $table->enum('status', ['pending', 'processing', 'done', 'failed'])->default('pending');
+            $table->string('status', 30)->default('pending');
             $table->json('extracted_data')->nullable(); // TranslationResult JSON
             $table->text('error_message')->nullable();
             $table->unsignedTinyInteger('attempts')->default(0);

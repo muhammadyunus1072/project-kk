@@ -115,6 +115,7 @@ class ExtractKkDataJob implements ShouldQueue
                 [
                     'batch_id'             => $this->submission->batch_id,
                     'user_id'              => $this->submission->user_id,
+                    'original_filename'    => $this->submission->original_filename,
                     'family_card_number'   => $data['familyCardNumber'] ?? '',
                     'head_of_family'       => $data['headOfFamily'] ?? '',
                     'head_of_family_japan' => $data['headOfFamily'] ?? '',

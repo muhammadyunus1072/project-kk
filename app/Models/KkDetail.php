@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Allows manual corrections to fix AI OCR typos and powers on-demand
  * DomPDF regeneration.
  *
- * @property string $id
- * @property string $submission_id
- * @property string $batch_id
+ * @property int $id
+ * @property int|null $submission_id
+ * @property int|null $batch_id
  * @property int $user_id
  * @property string $family_card_number
  * @property string $head_of_family
@@ -32,12 +31,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class KkDetail extends Model
 {
-    use HasUlids;
-
     protected $fillable = [
         'submission_id',
         'batch_id',
         'user_id',
+        'original_filename',
         'family_card_number',
         'head_of_family',
         'head_of_family_japan',
@@ -54,6 +52,15 @@ class KkDetail extends Model
         'is_submitted',
         'last_edited_at',
     ];
+
+    protected $appends = [
+        'original_filename',
+    ];
+
+    public function getOriginalFilenameAttribute(?string $value = null): ?string
+    {
+        return $value ?: $this->submission?->original_filename;
+    }
 
     protected $casts = [
         'address'           => 'array',

@@ -13,12 +13,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kk_batches', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedSmallInteger('total_files');
             $table->unsignedSmallInteger('completed')->default(0);
             $table->unsignedSmallInteger('failed')->default(0);
-            $table->enum('status', ['pending', 'processing', 'done', 'partial_failed'])->default('pending');
+            $table->string('status', 30)->default('pending');
             $table->timestamps();
         });
     }

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,8 +10,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * KkSubmission — represents a single KK image file attachment and its translation result.
  *
- * @property string $id
- * @property string $batch_id
+ * @property int $id
+ * @property int $batch_id
  * @property int $user_id
  * @property string $disk
  * @property string $path
@@ -27,8 +26,6 @@ use Illuminate\Support\Facades\Storage;
  */
 class KkSubmission extends Model
 {
-    use HasUlids;
-
     protected $fillable = [
         'batch_id',
         'user_id',
