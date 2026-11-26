@@ -81,6 +81,8 @@ class KkDetailController extends Controller
             'issued_place'         => 'nullable|string|max:100',
             'signatory_officer'    => 'nullable|string|max:255',
             'signatory_nip'        => 'nullable|string|max:100',
+            'original_data'        => 'nullable|array',
+            'translated_data'      => 'nullable|array',
             'is_submitted'         => 'nullable|boolean',
         ]);
 
@@ -99,6 +101,8 @@ class KkDetailController extends Controller
             'signatory_officer'    => $validated['signatory_officer'] ?? '',
             'signatory_nip'        => $validated['signatory_nip'] ?? '',
             'raw_gemini_output'    => null,
+            'original_data'        => $validated['original_data'] ?? null,
+            'translated_data'      => $validated['translated_data'] ?? null,
             'is_edited'            => false,
             'is_submitted'         => $validated['is_submitted'] ?? false,
         ]);
@@ -167,8 +171,29 @@ class KkDetailController extends Controller
             'issued_place'         => 'nullable|string|max:100',
             'signatory_officer'    => 'nullable|string|max:255',
             'signatory_nip'        => 'nullable|string|max:100',
+            'original_data'        => 'nullable|array',
+            'translated_data'      => 'nullable|array',
             'is_submitted'         => 'nullable|boolean',
         ]);
+
+        if ($request->has('original_data')) {
+            $validated['original_data'] = $request->input('original_data');
+        } elseif (! $detail->original_data && isset($validated['members'])) {
+            $validated['original_data'] = [
+                'family_card_number' => $validated['family_card_number'] ?? $detail->family_card_number,
+                'head_of_family'     => $validated['head_of_family'] ?? $detail->head_of_family,
+                'address'            => $validated['address'] ?? $detail->address,
+                'members'            => $validated['members'],
+                'issued_date'        => $validated['issued_date'] ?? $detail->issued_date,
+                'issued_place'       => $validated['issued_place'] ?? $detail->issued_place,
+                'signatory_officer'  => $validated['signatory_officer'] ?? $detail->signatory_officer,
+                'signatory_nip'      => $validated['signatory_nip'] ?? $detail->signatory_nip,
+            ];
+        }
+
+        if ($request->has('translated_data')) {
+            $validated['translated_data'] = $request->input('translated_data');
+        }
 
         $validated['is_edited'] = true;
         $validated['last_edited_at'] = now();

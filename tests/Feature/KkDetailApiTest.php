@@ -277,4 +277,29 @@ class KkDetailApiTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_update_persists_original_and_translated_data(): void
+    {
+        $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->putJson("/api/kk/details/{$this->detail->id}", [
+                'head_of_family'       => 'BUDI SANTOSO UPDATED',
+                'head_of_family_japan' => 'ブディ・サントソ・シン',
+                'original_data'        => [
+                    'head_of_family' => 'BUDI SANTOSO UPDATED',
+                ],
+                'translated_data'      => [
+                    'headOfFamily' => 'ブディ・サントソ・シン',
+                ],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('detail.head_of_family', 'BUDI SANTOSO UPDATED')
+            ->assertJsonPath('detail.head_of_family_japan', 'ブディ・サントソ・シン')
+            ->assertJsonPath('detail.original_data.head_of_family', 'BUDI SANTOSO UPDATED')
+            ->assertJsonPath('detail.translated_data.headOfFamily', 'ブディ・サントソ・シン');
+
+        $fresh = $this->detail->fresh();
+        $this->assertEquals('BUDI SANTOSO UPDATED', $fresh->original_data['head_of_family']);
+        $this->assertEquals('ブディ・サントソ・シン', $fresh->translated_data['headOfFamily']);
+    }
 }
