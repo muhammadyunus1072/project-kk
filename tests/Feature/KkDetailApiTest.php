@@ -7,6 +7,7 @@ use App\Models\KkDetail;
 use App\Models\KkSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class KkDetailApiTest extends TestCase
@@ -301,5 +302,45 @@ class KkDetailApiTest extends TestCase
         $fresh = $this->detail->fresh();
         $this->assertEquals('BUDI SANTOSO UPDATED', $fresh->original_data['head_of_family']);
         $this->assertEquals('ブディ・サントソ・シン', $fresh->translated_data['headOfFamily']);
+    }
+
+    public function test_user_can_stream_original_file(): void
+    {
+        Storage::fake('s3');
+        Storage::disk('s3')->put('kk-uploads/test/sample.jpg', 'fake-image-content');
+
+        $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->get("/api/kk/details/{$this->detail->id}/original-file");
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'image/jpeg');
+    }
+
+    public function test_unauthorized_user_cannot_access_original_file(): void
+    {
+        $otherUser = User::factory()->create(['email' => 'other_user@example.com']);
+        $otherToken = $otherUser->createToken('other-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$otherToken}")
+            ->get("/api/kk/details/{$this->detail->id}/original-file");
+
+        $response->assertStatus(403);
+    }
+
+    public function test_original_file_returns_404_for_manual_entry(): void
+    {
+        $manualDetail = KkDetail::create([
+            'user_id'            => $this->user->id,
+            'submission_id'      => null,
+            'family_card_number' => '1234567890123456',
+            'head_of_family'     => 'Manual User',
+            'address'            => [],
+            'members'            => [],
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->get("/api/kk/details/{$manualDetail->id}/original-file");
+
+        $response->assertStatus(404);
     }
 }

@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/details/{detail}/toggle-submitted',    [KkDetailController::class, 'toggleSubmitted']);
         Route::delete('/details/{detail}',                   [KkDetailController::class, 'destroy']);
         Route::get('/details/{detail}/pdf',                  [KkDetailController::class, 'regeneratePdf']);
+        Route::get('/details/{detail}/original-file',        [KkDetailController::class, 'originalFile']);
     });
 
     // Japanese Katakana Fast Transliterator (mirrors server.ts)

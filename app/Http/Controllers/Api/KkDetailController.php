@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * KkDetailController
@@ -294,6 +295,41 @@ class KkDetailController extends Controller
 
         return response()->json([
             'message' => 'Dokumen KK berhasil dihapus dari antrean.',
+        ]);
+    }
+
+    /**
+     * GET /api/kk/details/{detail}/original-file
+     *
+     * Stream the original uploaded input file (PDF or image).
+     */
+    public function originalFile(Request $request, KkDetail $detail)
+    {
+        abort_unless($detail->user_id === $request->user()->id, 403, 'Unauthorized.');
+
+        $submission = $detail->submission;
+        if (! $submission || ! $submission->path) {
+            abort(404, 'Dokumen ini tidak memiliki berkas unggahan fisik asli (Input Manual).');
+        }
+
+        $disk = Storage::disk($submission->disk);
+        if (! $disk->exists($submission->path)) {
+            abort(404, 'Berkas fisik tidak ditemukan di penyimpanan.');
+        }
+
+        $mimeType = $submission->mimetype ?: 'application/pdf';
+        $filename = $submission->original_filename ?: 'original_document.pdf';
+
+        return response()->stream(function () use ($disk, $submission) {
+            $stream = $disk->readStream($submission->path);
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type'        => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+            'Cache-Control'       => 'private, max-age=3600',
         ]);
     }
 }
